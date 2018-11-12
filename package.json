@@ -2,7 +2,8 @@
   "name": "metalsmith-inline-critical-css",
   "version": "0.1.0",
   "description": "Metalsmith plugin to inspect HTML files, inline used selectors from specified CSS, and load the rest asynchronously.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "test": "jest"
   },
@@ -28,7 +29,12 @@
   },
   "homepage": "https://github.com/fpapado/metalsmith-inline-critical-css#readme",
   "devDependencies": {
-    "jest": "^23.6.0"
+    "@types/cheerio": "^0.22.9",
+    "@types/debug": "0.0.31",
+    "@types/gzip-size": "^4.1.0",
+    "@types/invariant": "^2.2.29",
+    "jest": "^23.6.0",
+    "typescript": "^3.1.6"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",

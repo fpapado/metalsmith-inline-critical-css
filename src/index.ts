@@ -1,37 +1,47 @@
-const path = require('path');
-const fs = require('fs');
-const multimatch = require('multimatch');
-const invariant = require('invariant');
-const Purgecss = require('purgecss');
-const purgeHtml = require('purgecss-from-html');
-const gzipSize = require('gzip-size');
-const cheerio = require('cheerio');
+import path from 'path';
+import fs from 'fs';
+import multimatch from 'multimatch';
+import invariant from 'invariant';
+import Purgecss from 'purgecss';
+import purgeHtml from 'purgecss-from-html';
+import gzipSize from 'gzip-size';
+import cheerio from 'cheerio';
+import debug_ from 'debug';
 
 // Set up debug
-const debug = require('debug')('inline-critical-css-plugin');
+const debug = debug_('inline-critical-css-plugin');
 
-/**
- * Expose `plugin`.
- */
-module.exports = plugin;
+export default plugin;
+
+interface IOptions {
+  /** A multimatch pattern of files to run on. */
+  pattern: string;
+
+  /** The name of the css file in the metalsmith data. */
+  cssFile: string;
+
+  /**
+   * The path under which the css is included in the template.
+   * Important for knowing which <link> tag to replace.
+   */
+  cssPublicPath: string;
+}
 
 /**
  * Metalsmith plugin to inline critical css, and load the rest asynchronously.
- *
- * @arg cssPublicPath:
- *  The path under which the css is included in the template.
- *  Important for knowing which <link> tag to replace.
- *
- * @return {Function}
  */
-function plugin({pattern, cssFile, cssPublicPath} = {}) {
+function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
   invariant(!!pattern, 'You must supply a pattern for the html files.');
   invariant(
     !!cssFile && !Array.isArray(cssFile),
     'You must supply a single css file to look for. Multiple files are not currently supported'
   );
 
-  return function(files, metalsmith, done) {
+  return function(
+    files: Record<string, any>,
+    metalsmith: any,
+    done: () => void
+  ) {
     debug('WILL: Read CSS file', cssFile);
     const cssFilePath = path.resolve(cssFile);
     const cssContent = fs.readFileSync(cssFilePath, {encoding: 'utf-8'});
@@ -69,7 +79,7 @@ function plugin({pattern, cssFile, cssPublicPath} = {}) {
         debug('WILL: get used CSS');
         const usedCss = getUsedCss({
           htmlContent: fileContent,
-          cssContent: cssContent
+          cssContent: cssContent,
         });
         debug('OK: get used CSS');
 
@@ -82,7 +92,7 @@ function plugin({pattern, cssFile, cssPublicPath} = {}) {
           htmlContent: fileContent,
           cssPublicPath: cssPublicPath,
           criticalCssContent: usedCss,
-          loadCssPreloadContent
+          loadCssPreloadContent,
         });
         debug('OK: inject used CSS to file contents');
 
@@ -99,32 +109,37 @@ function plugin({pattern, cssFile, cssPublicPath} = {}) {
 //
 // HELPERS
 
+interface IPurgeContent {
+  htmlContent: string;
+  cssContent: string;
+}
+
 /**
  * Return only the css from cssContent that is used in htmlContent.
  * Might have false negatives where JS interaction is concerned, but
  * those should be minimal and in any case the full css should come
  * in before that.
  */
-const getUsedCss = ({htmlContent, cssContent}) => {
+const getUsedCss = ({htmlContent, cssContent}: IPurgeContent) => {
   const purgeCss = new Purgecss({
     content: [
       {
         raw: htmlContent,
-        extension: 'html'
-      }
+        extension: 'html',
+      },
     ],
     css: [
       {
         raw: cssContent,
-        extension: 'css'
-      }
+        extension: 'css',
+      },
     ],
     extractors: [
       {
         extractor: purgeHtml,
-        extensions: ['html']
-      }
-    ]
+        extensions: ['html'],
+      },
+    ],
   });
 
   // The result of purgeCss.purge() is an array because of multiple files.
@@ -132,6 +147,13 @@ const getUsedCss = ({htmlContent, cssContent}) => {
   const usedCss = purgeCss.purge()[0].css;
   return usedCss;
 };
+
+interface ICritical {
+  htmlContent: string;
+  cssPublicPath: string;
+  criticalCssContent: string;
+  loadCssPreloadContent: string;
+}
 
 /**
  * Inline Critical CSS in HTML, by replacing <link rel="stylesheet">
@@ -142,8 +164,8 @@ function inlineCriticalCss({
   htmlContent,
   cssPublicPath,
   criticalCssContent,
-  loadCssPreloadContent
-}) {
+  loadCssPreloadContent,
+}: ICritical) {
   // Set up new markup
   const criticalStyleTag = `<style>${criticalCssContent}</style>`;
 
@@ -176,11 +198,12 @@ function inlineCriticalCss({
    *  <script>load-css-preload-polyfill</script>
    */
   $link
+    // @ts-ignore
     .attr({
       rel: 'preload',
       as: 'style',
       // eslint-disable-next-line quotes
-      onload: `this.onload=null;this.rel='stylesheet'`
+      onload: `this.onload=null;this.rel='stylesheet'`,
     })
     .before(criticalStyleTag)
     .after(loadCssPreloadScript)

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es2015",
+    "module": "commonjs",
+    "lib": ["es2015", "es2016", "es2017"],
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "declarationDir": "dist/",
+    "outDir": "dist/",
+    "baseUrl": "./",
+    "paths": {
+      "*": ["src/@types/*"]
+    },
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": ["src"]
+}
