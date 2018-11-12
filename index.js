@@ -38,11 +38,9 @@ function plugin({pattern, cssFile, cssPublicPath} = {}) {
     debug('OK: Read CSS file');
 
     // Read the LoadCSS file once
-    debug('WILL: Read LoadCSS file');
-    const loadCssPreloadContent = fs.readFileSync(
-      path.resolve('node_modules/fg-loadcss/dist/cssrelpreload.min.js')
-    );
-    debug('OK: Read LoadCSS file');
+    debug('WILL: Read LoadCSS contents');
+    const loadCssPreloadContent = getLoadCSSFallback();
+    debug('OK: Read LoadCSS contents');
 
     // Loop over all the files, applying the transform if matching
     Object.keys(files)
