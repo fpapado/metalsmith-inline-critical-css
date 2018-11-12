@@ -26,9 +26,9 @@ Inlining the critical CSS for a page is one of the most important optimisations 
 This package is distributed via [npm](https://www.npmjs.com/get-npm).
 
 ```shell
-$ npm install --save elmlike
+$ npm install --save metalsmith-inline-critical-css
 # or
-$ yarn add elmlike
+$ yarn add metalsmith-inline-critical-css
 ```
 
 Then you can use the plugin in your metalsmith pipeline:
