@@ -1,0 +1,27 @@
+{
+  "name": "metalsmith-inline-critical-css",
+  "version": "1.0.0",
+  "description": "Metalsmith plugin to inspect HTML files, inline used selectors from specified CSS, and load the rest asynchronously.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fpapado/metalsmith-inline-critical-css.git"
+  },
+  "keywords": [
+    "metalsmith",
+    "critical",
+    "css",
+    "inline",
+    "preload",
+    "loadcss"
+  ],
+  "author": "Fotis Papadogeorgopoulos (fpapado)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fpapado/metalsmith-inline-critical-css/issues"
+  },
+  "homepage": "https://github.com/fpapado/metalsmith-inline-critical-css#readme"
+}
