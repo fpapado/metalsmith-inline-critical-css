@@ -3,6 +3,7 @@
 > A Metalsmith plugin to inspect HTML files, inline used selectors from specified CSS, and load the rest asynchronously.
 
 ## Motivation
+
 When the browser encounters a `<link rel="stylesheet">` in the `<head>`, it pauses, goes to the network, fetches the file, and only then continues.
 This is called "render blocking".
 If it sounds bad for performance, it's because it is!
@@ -18,6 +19,63 @@ Inlining the critical CSS for a page is one of the most important optimisations 
 
 ## Quick start
 
+Use this in your metalsmith pipeline:
+
+```js
+const fs = require('fs');
+const path = require('path');
+const metalsmith = require('metalsmith');
+const criticalCss = require('metalsmith-inline-critical-css');
+
+const INPUT_DIR = '_site/';
+const OUTPUT_DIR = '_site/';
+
+function main() {
+  // Run metalsmith pipeline
+  metalsmith(process.cwd())
+    .source(INPUT_DIR) // source directory
+    .destination(OUTPUT_DIR) // destination directory
+    .clean(false) // clean destination before
+    .use(
+      criticalCss({
+        // Files to run against
+        pattern: '**/*.html',
+        // The CSS file whose selectors will be matched against the html
+        cssFile: path.join(INPUT_DIR, hashedCssFilename),
+        // The path under which the css is included in the template files
+        cssPublicPath: hashedCssFilename,
+      })
+    )
+    .build(function(err) {
+      if (err) {
+        console.log('Error running the metalsmith pipeline: ' + err);
+        throw err;
+      }
+      console.log('Done!');
+    });
+}
+
+main();
+```
+
 ## Options
 
+```ts
+interface IOptions {
+  /** A multimatch pattern of files to run on. */
+  pattern: string;
+
+  /** The name of the css file in the metalsmith data. */
+  cssFile: string;
+
+  /**
+   * The path under which the css is included in the template.
+   * Important for knowing which <link> tag to replace.
+   */
+  cssPublicPath: string;
+}
+```
+
 ## Credits, Thanks, Inspiration
+
+Thanks to Filament Group for their work on Load CSS!
