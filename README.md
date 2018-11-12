@@ -2,6 +2,10 @@
 
 > A Metalsmith plugin to inspect HTML files, inline used selectors from specified CSS, and load the rest asynchronously.
 
+[![npm](https://badgen.net/npm/v/metalsmith-inline-critical-css)](https://www.npmjs.com/package/metalsmith-inline-critical-css)
+[![npm downloads](https://badgen.net/npm/dm/metalsmith-inline-critical-css)](https://www.npmjs.com/package/metalsmith-inline-critical-css)
+[![dependencies](https://badgen.net/david/dep/fpapado/metalsmith-inline-critical-css)](https://david-dm.org/fpapado/metalsmith-inline-critical-css)
+
 ## Motivation
 
 When the browser encounters a `<link rel="stylesheet">` in the `<head>`, it pauses, goes to the network, fetches the file, and only then continues.
@@ -19,7 +23,15 @@ Inlining the critical CSS for a page is one of the most important optimisations 
 
 ## Quick start
 
-Use this in your metalsmith pipeline:
+This package is distributed via [npm](https://www.npmjs.com/get-npm).
+
+```shell
+$ npm install --save elmlike
+# or
+$ yarn add elmlike
+```
+
+Then you can use the plugin in your metalsmith pipeline:
 
 ```js
 const fs = require('fs');
@@ -27,6 +39,7 @@ const path = require('path');
 const metalsmith = require('metalsmith');
 const criticalCss = require('metalsmith-inline-critical-css');
 
+// Set these as you want for your application
 const INPUT_DIR = '_site/';
 const OUTPUT_DIR = '_site/';
 
