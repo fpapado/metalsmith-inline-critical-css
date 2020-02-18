@@ -43,12 +43,14 @@
     "@types/debug": "4.1.5",
     "@types/gzip-size": "^5.1.1",
     "@types/invariant": "^2.2.31",
+    "@types/jest": "^25.1.2",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
     "lint-staged": "^10.0.7",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.2",
+    "ts-jest": "^25.2.0",
     "typescript": "^3.7.5"
   },
   "dependencies": {
@@ -68,8 +70,7 @@
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css,md}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   }
 }

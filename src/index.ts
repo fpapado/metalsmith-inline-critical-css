@@ -45,6 +45,7 @@ function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
     debug('WILL: Read CSS file', cssFile);
     const cssFilePath = path.resolve(cssFile);
     const cssContent = fs.readFileSync(cssFilePath, {encoding: 'utf-8'});
+    debug({cssFilePath, cssContent});
     debug('OK: Read CSS file');
 
     // Read the LoadCSS file once
@@ -78,6 +79,7 @@ function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
           debug('OK: Read html file contents');
 
           debug('WILL: get used CSS');
+          debug({fileContent, cssContent});
           const usedCss = await getUsedCss({
             htmlContent: fileContent,
             cssContent: cssContent,
