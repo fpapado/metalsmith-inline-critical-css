@@ -34,10 +34,10 @@ function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
   invariant(!!pattern, 'You must supply a pattern for the html files.');
   invariant(
     !!cssFile && !Array.isArray(cssFile),
-    'You must supply a single css file to look for. Multiple files are not currently supported'
+    'You must supply a single css file to look for. Multiple files are not currently supported.'
   );
 
-  return function(
+  return async function(
     files: Record<string, any>,
     metalsmith: any,
     done: () => void
@@ -53,56 +53,59 @@ function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
     debug('OK: Read LoadCSS contents');
 
     // Loop over all the files, applying the transform if matching
-    Object.keys(files)
-      .filter(file => {
-        const matches = multimatch(file, pattern).length > 0;
+    await Promise.all(
+      Object.keys(files)
+        .filter(file => {
+          const matches = multimatch(file, pattern).length > 0;
 
-        if (matches) {
-          debug(`MATCH: ${file}`);
-        } else {
-          debug(`NO MATCH: ${file}`);
-        }
+          if (matches) {
+            debug(`MATCH: ${file}`);
+          } else {
+            debug(`NO MATCH: ${file}`);
+          }
 
-        return matches;
-      })
-      .forEach(function(file) {
-        debug(`WILL: Run for ${file}`);
+          return matches;
+        })
+        .map(async function(file) {
+          debug(`WILL: Run for ${file}`);
 
-        // utf-8 decode read file contents
-        debug('WILL: Read html file contents');
-        let fileContent = files[file].contents;
-        if (!!fileContent && fileContent instanceof Buffer) {
-          fileContent = fileContent.toString('utf-8');
-        }
-        debug('OK: Read html file contents');
+          // utf-8 decode read file contents
+          debug('WILL: Read html file contents');
+          let fileContent = files[file].contents;
+          if (!!fileContent && fileContent instanceof Buffer) {
+            fileContent = fileContent.toString('utf-8');
+          }
+          debug('OK: Read html file contents');
 
-        debug('WILL: get used CSS');
-        const usedCss = getUsedCss({
-          htmlContent: fileContent,
-          cssContent: cssContent,
-        });
-        debug('OK: get used CSS');
+          debug('WILL: get used CSS');
+          const usedCss = await getUsedCss({
+            htmlContent: fileContent,
+            cssContent: cssContent,
+          });
+          debug('OK: get used CSS');
 
-        // NOTE: The gzip size will be even smaller when inlined into the document,
-        // because the classes are shared
-        debug(`Used CSS gzip-size (standalone): ${gzipSize.sync(usedCss)} B`);
+          // NOTE: The gzip size will be even smaller when inlined into the document,
+          // because the classes are shared
+          debug(`Used CSS gzip-size (standalone): ${gzipSize.sync(usedCss)} B`);
 
-        debug('WILL: inject used CSS to file contents');
-        const htmlWithInline = inlineCriticalCss({
-          htmlContent: fileContent,
-          cssPublicPath: cssPublicPath,
-          criticalCssContent: usedCss,
-          loadCssPreloadContent,
-        });
-        debug('OK: inject used CSS to file contents');
+          debug('WILL: inject used CSS to file contents');
+          const htmlWithInline = inlineCriticalCss({
+            htmlContent: fileContent,
+            cssPublicPath: cssPublicPath,
+            criticalCssContent: usedCss,
+            loadCssPreloadContent,
+          });
+          debug('OK: inject used CSS to file contents');
 
-        debug('WILL: write to file contents');
-        files[file].contents = htmlWithInline;
-        debug('OK: write to file contents');
+          debug('WILL: write to file contents');
+          files[file].contents = htmlWithInline;
+          debug('OK: write to file contents');
 
-        debug('OK: Critical CSS plugin run');
-        done();
-      });
+          debug('OK: Critical CSS plugin run');
+        })
+    );
+
+    done();
   };
 }
 
@@ -120,8 +123,8 @@ interface IPurgeContent {
  * those should be minimal and in any case the full css should come
  * in before that.
  */
-const getUsedCss = ({htmlContent, cssContent}: IPurgeContent) => {
-  const purgeCss = new Purgecss({
+const getUsedCss = async ({htmlContent, cssContent}: IPurgeContent) => {
+  const purgeCssResults = await new Purgecss().purge({
     content: [
       {
         raw: htmlContent,
@@ -131,12 +134,12 @@ const getUsedCss = ({htmlContent, cssContent}: IPurgeContent) => {
     css: [
       {
         raw: cssContent,
-        extension: 'css',
+        // extension: 'css',
       },
     ],
     extractors: [
       {
-        extractor: purgeHtml,
+        extractor: purgeHtml as any,
         extensions: ['html'],
       },
     ],
@@ -144,7 +147,7 @@ const getUsedCss = ({htmlContent, cssContent}: IPurgeContent) => {
 
   // The result of purgeCss.purge() is an array because of multiple files.
   // We only have one file, so we take the first one.
-  const usedCss = purgeCss.purge()[0].css;
+  const usedCss = purgeCssResults[0].css;
   return usedCss;
 };
 
