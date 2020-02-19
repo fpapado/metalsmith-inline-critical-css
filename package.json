@@ -1,6 +1,6 @@
 {
   "name": "metalsmith-inline-critical-css",
-  "version": "1.0.0.beta",
+  "version": "1.0.0-beta.2",
   "description": "Metalsmith plugin to inspect HTML files, inline used selectors from specified CSS, and load the rest asynchronously.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,6 +44,7 @@
     "@types/gzip-size": "^5.1.1",
     "@types/invariant": "^2.2.31",
     "@types/jest": "^25.1.2",
+    "@types/node": "^13.7.2",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
     "lint-staged": "^10.0.7",
