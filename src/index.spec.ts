@@ -25,18 +25,16 @@ describe('base', () => {
   });
 
   test('purges content from html', async () => {
-    const inputHtml = `
-    <html>
-      <head>
-        <link rel="stylesheet" href="index.css" />
-      </head>
-      <body>
-        <p class="test">
-          <strong>Hello</strong>
-        </p>
-      </body>
-    </html>
-    `;
+    const inputHtml = `<html>
+  <head>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <p class="test">
+      <strong>Hello</strong>
+    </p>
+  </body>
+</html>`;
 
     const metalsmithFiles = {
       'index.html': {
@@ -54,22 +52,22 @@ describe('base', () => {
 
     await done;
 
-    const expectedHtml = `
-<html><head>
-        <style>
+    const expectedHtml = `<html><head>
+    <style>
     .test {
       color: red;
     }
     strong {
       font-weight: 600;
     }
-    </style><link rel="preload" href="index.css" as="style" onload="this.onload=null;this.rel=&apos;stylesheet&apos;"><noscript><link rel="stylesheet" href="index.css"></noscript><script>
-    </head>
-      <body>
-        <p class="test">
-          <strong>Hello</strong>
-        </p>
-    </body></html>`;
+    </style><link rel="stylesheet" href="index.css" media="print" onload="this.media=&apos;all&apos;"><noscript><link rel="stylesheet" href="index.css"></noscript>
+  </head>
+  <body>
+    <p class="test">
+      <strong>Hello</strong>
+    </p>
+  
+</body></html>`;
     expect(metalsmithFiles['index.html'].contents).toEqual(expectedHtml);
   });
 });

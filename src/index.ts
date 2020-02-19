@@ -48,11 +48,6 @@ function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
     debug({cssFilePath, cssContent});
     debug('OK: Read CSS file');
 
-    // Read the LoadCSS file once
-    debug('WILL: Read LoadCSS contents');
-    const loadCssPreloadContent = getLoadCSSFallback();
-    debug('OK: Read LoadCSS contents');
-
     // Loop over all the files, applying the transform if matching
     await Promise.all(
       Object.keys(files)
@@ -95,7 +90,6 @@ function plugin({pattern, cssFile, cssPublicPath}: IOptions) {
             htmlContent: fileContent,
             cssPublicPath: cssPublicPath,
             criticalCssContent: usedCss,
-            loadCssPreloadContent,
           });
           debug('OK: inject used CSS to file contents');
 
@@ -157,7 +151,6 @@ interface ICritical {
   htmlContent: string;
   cssPublicPath: string;
   criticalCssContent: string;
-  loadCssPreloadContent: string;
 }
 
 /**
@@ -169,7 +162,6 @@ function inlineCriticalCss({
   htmlContent,
   cssPublicPath,
   criticalCssContent,
-  loadCssPreloadContent,
 }: ICritical) {
   // Set up new markup
   const criticalStyleTag = `<style>${criticalCssContent}</style>`;
@@ -186,43 +178,23 @@ function inlineCriticalCss({
     return htmlContent;
   }
 
-  // NOTE: .html() returns '' for some reason, so we use toString() instead...
   const linkStylesheet = $link.toString();
-
   const noscriptFallback = `<noscript>${linkStylesheet}</noscript>`;
 
-  // Fallback for browsers that do not support link rel="preload"
-  // @see https://github.com/filamentgroup/loadCSS
-  const loadCssPreloadScript = `<script>${loadCssPreloadContent}</script>`;
-
-  /* Add the relevant markup to the page.
+  /* Change the link tag and add the relevant markup to the page.
    * <link rel="stylesheet"...> ->
    *  <style>.inlined-things{...}</style>
-   *  <link rel="preload" href="path/to/mystylesheet.css" as="style" onload="this.rel='stylesheet'">
+   *  <link rel="stylesheet" href="/path/to/mystylesheet.css" media="print" onload="this.media='all'">
    *  <noscript><link rel="stylesheet" ...></noscript>
-   *  <script>load-css-preload-polyfill</script>
    */
   $link
-    // @ts-ignore
     .attr({
-      rel: 'preload',
-      as: 'style',
-      // eslint-disable-next-line quotes
-      onload: `this.onload=null;this.rel='stylesheet'`,
+      media: 'print',
+      onload: `this.media='all'`,
     })
     .before(criticalStyleTag)
-    .after(loadCssPreloadScript)
     .after(noscriptFallback);
 
   const newHtml = $.html();
   return newHtml;
-}
-
-/**
- * Inlined cssrelpreload.min.js fallback
- */
-function getLoadCSSFallback() {
-  return `
-!function(t){"use strict";t.loadCSS||(t.loadCSS=function(){});var e=loadCSS.relpreload={};if(e.support=function(){var e;try{e=t.document.createElement("link").relList.supports("preload")}catch(t){e=!1}return function(){return e}}(),e.bindMediaToggle=function(t){function e(){t.media=a}var a=t.media||"all";t.addEventListener?t.addEventListener("load",e):t.attachEvent&&t.attachEvent("onload",e),setTimeout(function(){t.rel="stylesheet",t.media="only x"}),setTimeout(e,3e3)},e.poly=function(){if(!e.support())for(var a=t.document.getElementsByTagName("link"),n=0;n<a.length;n++){var o=a[n];"preload"!==o.rel||"style"!==o.getAttribute("as")||o.getAttribute("data-loadcss")||(o.setAttribute("data-loadcss",!0),e.bindMediaToggle(o))}},!e.support()){e.poly();var a=t.setInterval(e.poly,500);t.addEventListener?t.addEventListener("load",function(){e.poly(),t.clearInterval(a)}):t.attachEvent&&t.attachEvent("onload",function(){e.poly(),t.clearInterval(a)})}"undefined"!=typeof exports?exports.loadCSS=loadCSS:t.loadCSS=loadCSS}("undefined"!=typeof global?global:this);
-  `;
 }
