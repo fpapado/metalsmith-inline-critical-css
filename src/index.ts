@@ -179,21 +179,18 @@ function inlineCriticalCss({
   }
 
   const linkStylesheet = $link.toString();
-  const noscriptFallback = `<noscript>${linkStylesheet}</noscript>`;
 
   /* Change the link tag and add the relevant markup to the page.
    * <link rel="stylesheet"...> ->
    *  <style>.inlined-things{...}</style>
    *  <link rel="stylesheet" href="/path/to/mystylesheet.css" media="print" onload="this.media='all'">
-   *  <noscript><link rel="stylesheet" ...></noscript>
    */
   $link
     .attr({
       media: 'print',
       onload: `this.media='all'`,
     })
-    .before(criticalStyleTag)
-    .after(noscriptFallback);
+    .before(criticalStyleTag);
 
   const newHtml = $.html();
   return newHtml;

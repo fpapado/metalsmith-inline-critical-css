@@ -60,7 +60,7 @@ describe('base', () => {
     strong {
       font-weight: 600;
     }
-    </style><link rel="stylesheet" href="index.css" media="print" onload="this.media=&apos;all&apos;"><noscript><link rel="stylesheet" href="index.css"></noscript>
+    </style><link rel="stylesheet" href="index.css" media="print" onload="this.media=&apos;all&apos;">
   </head>
   <body>
     <p class="test">
